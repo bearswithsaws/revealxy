@@ -4,9 +4,12 @@ Reveal the location Reconxy trail cameras that leverage the LTE modem for remote
 
 # Exif Data
 
+Decode the log in the Exif tag MakerNote at offset 970 through 1994 using the bytes `0xd2 0x8b`
+
 ![hex editor view of image](docs/hex_editor.png)
 
-MakerNote data at [970:1024]
+MakerNote data at [970:1994]
+
 All MSB set (0x80):
 
 ```
