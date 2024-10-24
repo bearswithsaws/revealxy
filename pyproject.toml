@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "cv-img"
+version = "0.1.0"
+description = ""
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+opencv-python = "^4.10.0.84"
+requests = "^2.32.3"
+exifread = "^3.0.0"
+rich = "^13.9.2"
+beautifulsoup4 = "^4.12.3"
+dateutils = "^0.6.12"
+matplotlib = "^3.9.2"
+pandas = "^2.2.3"
+folium = "^0.18.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
