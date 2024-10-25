@@ -14,10 +14,10 @@ import hashlib
 import requests
 import folium
 
-IMAGE_ARCHIVE_A = "https://projectskydrop.com/cameras/archiveA/"
+IMAGE_ARCHIVE_A = "https://"
 FIRST_IMAGE_A = "001794.jpg"
 LAST_IMAGE_A = "003361.jpg"
-IMAGE_ARCHIVE_B = "https://projectskydrop.com/cameras/archiveB/"
+IMAGE_ARCHIVE_B = "https://"
 FIRST_IMAGE_B = "000422.jpg"
 LAST_IMAGE_B = "000960.jpg"
 
