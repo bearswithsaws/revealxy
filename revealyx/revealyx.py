@@ -13,6 +13,7 @@ import time
 import hashlib
 import requests
 import folium
+import shutil
 
 IMAGE_ARCHIVE_A = "https://"
 FIRST_IMAGE_A = "001794.jpg"
@@ -116,9 +117,10 @@ def parse_args() -> argparse.Namespace:
                     description='DOwnloads and parses images. Also does some opencv',
                     epilog='Boom goes the dynamite.')
     parser.add_argument("-v", "--verbose", action="store_true", help="Verbose mode")
-    parser.add_argument("-ia", "--image_dir_a", type=Path, default=Path("imgs_a"), help="Image directory.")
-    parser.add_argument("-ib", "--image_dir_b", type=Path, default=Path("imgs_b"), help="Image directory.")
+    parser.add_argument("-ia", "--image_dir_a", type=Path, default=Path("images", "imgs_a"), help="Image directory.")
+    parser.add_argument("-ib", "--image_dir_b", type=Path, default=Path("images", "imgs_b"), help="Image directory.")
     parser.add_argument("-o", "--output-map", default="final_map_.html", help="Map filename")
+    parser.add_argument("-s", "--sync-images", action="store_true", default=False, help="Pull images from the site. DONT DO THIS.")
     return parser.parse_args()
 
 def latest_image_local(dir: Path, default: str | None = None) -> int:
@@ -164,6 +166,16 @@ def generate_md5_hash(data: bytes):
     md5.update(data)
     return md5.hexdigest()
 
+def parse_tower_info(line: str) -> tuple:
+    parts = line.split(",")
+    if len(parts) < 13:
+        return ()
+    mcc = int(parts[4])
+    mnc = int(parts[5])
+    tac = int(parts[12],16)
+    cellid = int(parts[6], 16)
+    return (mcc, mnc,tac ,cellid)
+    
 def extract_cell_towers(dir):
     images = enumerate_local_images(dir)
     unq = []
@@ -193,6 +205,7 @@ def extract_cell_towers(dir):
                     for line in lines:
                         if line.startswith("+QENG:"):
                             qeng.append(line)
+
             except KeyError:
                 logging.debug(f"Image {img} does not have proper tags")
                 
@@ -200,14 +213,8 @@ def extract_cell_towers(dir):
     logging.info(f"Unique data chunnks: {len(unq_encs)}")
     towers = set()
     for line in qeng:
-        parts = line.split(",")
-        if len(parts) < 13:
-            continue
-        mcc = int(parts[4])
-        mnc = int(parts[5])
-        tac = int(parts[12],16)
-        cellid = int(parts[6], 16)
-        towers.add((mcc, mnc,tac ,cellid))
+        if (tower := parse_tower_info(line)):
+            towers.add(tower)
     return towers
 
 def get_tower_location(mcc: int, mnc: int, lac: int, cell_id: int) -> dict:
@@ -232,7 +239,8 @@ def main(args: argparse.Namespace) -> None:
     # Make sure the image image dir exists:
     args.image_dir_a.mkdir(parents=True, exist_ok=True)
     args.image_dir_b.mkdir(parents=True, exist_ok=True)
-    sync_images(args)
+    if args.sync_images:
+        sync_images(args)
 
     map = None
     log_lines = []

@@ -1,4 +1,5 @@
-*.jpg
+archive_a/
+archive_b/
 *.html
 *.tar.gz
 __pycache__/
