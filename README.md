@@ -1,6 +1,6 @@
 # Revealxy
 
-Reveal the location Reconxy trail cameras that leverage the LTE modem for remote picture uploads.
+Reveal the location Reconyx trail cameras that leverage the LTE modem for remote picture uploads.
 
 # Exif Data
 
