@@ -13,7 +13,6 @@ import time
 import hashlib
 import requests
 import folium
-import shutil
 
 IMAGE_ARCHIVE_A = "https://"
 FIRST_IMAGE_A = "001794.jpg"
@@ -201,6 +200,8 @@ def extract_cell_towers(dir):
                     # decode logs
                     flipflop2 = [x^y for x,y in zip(enc,flipflip)]
                     lines = "".join([chr(x) for x in flipflop2]).split("\n")
+                    if f.name == "images/imgs_a/001585.jpg":
+                        print("\n".join(lines))
                     # save QENG lines
                     for line in lines:
                         if line.startswith("+QENG:"):

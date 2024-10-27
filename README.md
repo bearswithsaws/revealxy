@@ -2,24 +2,147 @@
 
 Reveal the location Reconyx trail cameras that leverage the LTE modem for remote picture uploads.
 
-# Exif Data
+The winner of Project Skydrop used his meteorological background combined with time, temperature and light data to narrow down possible locations of the treasure. After the trophy was found, the game runners removed the temperature from the images, but left it in the EXIF metadata. Once tipped off to that, they then removed it from the metadata as well.
 
-Decode the log in the Exif tag MakerNote at offset 970 through 1994 using the bytes `0xd2 0x8b`
+At that point, the game seemed secure.
+
+As it turns out, there was damming information hidden deep within the image metadata that allows for extremely precise triangulation of the Reconyx trail cameras used in this hunt.
+
+# Known Reconyx EXIF Tags
+
+Exiftool has some documentation on the known tags for Reconyx cameras: https://exiftool.org/TagNames/Reconyx.html. For the LTE cameras used in Project Skydrop, there exists some additional data which is not documented here.
+
+In the "MakerNote" tag, at offset 970, there is a 1024 byte buffer of data that has a low/mid level of entropy, yet the MSB of each byte is set (with the exception of a couple, likely due to a bug in the printing by the firmware).
 
 ![hex editor view of image](docs/hex_editor.png)
 
-MakerNote data at [970:1994]
+## LTE Band 4, Verizon
 
-All MSB set (0x80):
-
+```plaintext
+50,4,3,3,3D04,-81,-12,-51,12,-
+OK
+AT+COPS?
++COPS: 0,1,"VzW",7
+OK
+AT+QNWINFO
++QNWINFO: "FDD LTE","311480","LTE BAND 4",2250
+OK
+?AT+QIACT?
++QIACT: 3,1,1,"100.90.42.255"
+OK
+AT+QIDNSCFG=3
++QIDNSCFG: 3,"198.224.186.135","198.224.187.135"
+OK
+_Q_!@%<AT+CEREG?
++CEREG: 0,1
+OK
+>AT+CSQ
++CSQ: 30,99
+OK
+AT+QNWINFO
++QNWINFO: "FDD LTE","311480","LTE BAND 4",2250
+OK
+AT+QENG="servingcell"
++QENG: "servingcell","NOCONN","LTE","FDD",311,480,F0A317,320,2250,4,3,3,3D04,-83,-8,-56,23,41
+OK
+AT+COPS?
++COPS: 0,1,"VzW",7
+OK
+AT+QNWINFO
++QNWINFO: "FDD LTE","311480","LTE BAND 4",2250
+OK
+?AT+QIACT?
++QIACT: 3,1,1,"100.90.42.255"
+OK
+AT+QIDNSCFG=3
++QIDNSCFG: 3,"198.224.186.135","198.224.187.135"
+OK
+MBL_0095.JPG_Qhttps://cell.reconyx.com/api/images/
+OK
+AT+QHTTPPOSTFILE="RAM:temp.dat",120
+OK
+_Q_K
++QHTTPPOSTFILE: 0,200,0
+AT+QFDEL="RAM:temp.dat"
+OK
+TX7_!@%<AT+CEREG?
++CEREG: 0,1
+OK
+>AT+CSQ
++CSQ: 30,99
+OK
+AT+QNWINFO
++QNWINFO: "FDD LTE","311480","LTE BAND 4",2250
+OK
+AT+QENG="servingcell"
++QENG: "servingcell","NOCONN","LTE","FDD",311,480,F0A30D,319,22
 ```
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 35, 5, 13, 0, 4, 24, 0, 0, 0, 0, 0, 0, 6, 0, 0, 4, 17, 2, 8, 6, 8, 7, 8, 0, 8, 0, 14, 23, 24, 7, 0, 22, 2, 3, 0, 5, 18, 7, 23, 0, 36, 3, 14, 0, 0, 2, 0, 0, 11, 2, 4, 4, 2, 6, 8, 9, 15, 29, 34, 9, 0, 12, 8, 12, 0, 4, 2, 14, 13, 2, 7, 7, 0, 24, 0, 4, 15, 18, 14, 0, 0, 0, 1, 0, 0, 0, 0, 37, 2, 17, 4, 4, 0, 1, 22, 11, 7, 30, 35, 7, 11, 7, 5, 16, 0, 3, 4, 5, 4, 7, 3, 28, 0, 16, 0, 2, 0, 0, 0, 4, 18, 0, 1, 4, 4, 47, 5]
 
-[0:0x7f]
-[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+## LTE Band 2, AT&T
 
-[0x80:]
-[5, 35, 5, 13, 0, 4, 24, 0, 0, 0, 0, 0, 0, 6, 0, 0, 4, 17, 2, 8, 6, 8, 7, 8, 0, 8, 0, 14, 23, 24, 7, 0, 22, 2, 3, 0, 5, 18, 7, 23, 0, 36, 3, 14, 0, 0, 2, 0, 0, 11, 2, 4, 4, 2, 6, 8, 9, 15, 29, 34, 9, 0, 12, 8, 12, 0, 4, 2, 14, 13, 2, 7, 7, 0, 24, 0, 4, 15, 18, 14, 0, 0, 0, 1, 0, 0, 0, 0, 37, 2, 17, 4, 4, 0, 1, 22, 11, 7, 30, 35, 7, 11, 7, 5, 16, 0, 3, 4, 5, 4, 7, 3, 28, 0, 16, 0, 2, 0, 0, 0, 4, 18, 0, 1, 4, 4, 47, 5]
+```plaintext
++QIACT?
++QIACT: 1,1,1,"10.129.55.173"
+OK
+AT+QIDNSCFG=1
++QIDNSCFG: 1,"100.121.11.10","100.122.11.10"
+OK
+MBL_1641.JPG+QFUPL: 274347,f5d9
+OK
+AT+QHTTPURL=36,30
+CONNECT
+https://cell.reconyx.com/api/images/
+OK
+AT+QHTTPPOSTFILE="RAM:temp.dat",120
+OK
+_Q0,410,FE2909,481,675,2,4,4,403,-93,-10,-64,21,36
+OK
+AT+COPS?
++COPS: 0,1,"AT&T",7
+OK
+AT+QNWINFO
++QNWINFO: "FDD LTE","310410","LTE BAND 2",675
+OK
+?AT+QIACT?
++QIACT: 1,1,1,"10.129.55.173"
+OK
+AT+QIDNSCFG=1
++QIDNSCFG: 1,"100.121.11.10","100.122.11.10"
+OK
+MBL_1640.JPG_Q_K+QFUPL: 270313,671a
+OK
+AT+QHTTPURL=36,30
+CONNECT
+https://cell.reconyx.com/api/images/
+OK
+AT+QHTTPPOSTFILE="RAM:temp.dat",120
+OK
+_Q_K
++QHTTPPOSTFILE: 0,200,0
+AT+QFDEL="RAM:temp.dat"
+OK
+TX18_!@%<AT+CEREG?
++CEREG: 0,1
+OK
+>AT+CSQ
++CSQ: 25,99
+OK
+AT+QNWINFO
++QNWINFO: "FDD LTE","310410","LTE BAND 2",675
+OK
+AT+QENG="servingcell"
++QENG: "servingcell","NOCONN","LTE","FDD",310,410,FE2909,481,675,2,4,4,403,-96,-6,-64,16,34
+OK
+AT+COPS?
++COPS: 0,1,"AT&T",7
+OK
+AT+QNWINFO
++QNWINFO: "FDD LTE","310410","LTE BAND 2",675
+OK
+?AT
+```
+
+The response to the `AT+QENG` command appeared to contain a lot of information. Using the documentation by the LTE Modem manufacturer, Quectel, the values logged are tower specific identifiers: MCC, MNC, TAC, and CellID
 ```
 
 # LTE Modem
@@ -32,16 +155,15 @@ All MSB set (0x80):
 +QENG: "servingcell","NOCONN","LTE","FDD",311,480,F0A30D,319,2250,4,3,3,3D04,-79,-8,-54,16,44
 ```
 
-- MCC: 310
-- MNC: 480
-- CellID: F0A30D / 15770381
-- TAC: 3D04 / 15620
+# Opencellid
+
+Given the tower identifiers, querying opencellid.org returns the coordinates of the tower as well as its range:
 
 ```
 **MCC**: 311  
 **MNC**: 480  
-**LAC / TAC**: 3D04 / 15620  
-**CID**: F0A30D / 15770381  
+**LAC / TAC**: 15620  
+**CID**: 15770381  
 **Radio Type**: LTE
 
 **Latitude**: 43.186111  
@@ -52,9 +174,10 @@ _3_ measurements
 **Created**: 2017-02-27T08:08:44.000Z  
 **Updated**: 2017-04-15T10:15:59.000Z
 
-Source:
 https://opencellid.org/#zoom=18&lat=43.186267&lon=-70.893617
 ```
+
+At this point the towers and cell radius can be mapped and the locations of the cameras should appear in the overlap. 
 
 # Calculated Locations
 
